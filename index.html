@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DayFlow</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 16px; }
+    h1 { margin: 0 0 12px; }
+    form { display: flex; gap: 8px; margin-bottom: 12px; }
+    input, button { font-size: 16px; }
+    input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 8px; }
+    button { padding: 12px 16px; border-radius: 8px; border: none; background:#000; color:#fff; cursor: pointer; }
+    pre { white-space: pre-wrap; background: #f6f6f6; padding: 16px; border-radius: 8px; }
+    .hint { color:#666; font-size:14px; margin-bottom:8px;}
+  </style>
+</head>
+<body>
+  <h1>DayFlow</h1>
+  <div class="hint">Dein smarter Tagesablauf für Reisen – mit klarer Route und Flow.</div>
+
+  <form id="f">
+    <input id="prompt" placeholder="z.B. 1 Tag in Lissabon mit Aussicht & vegetarisch" />
+    <button type="submit">Plan generieren</button>
+  </form>
+
+  <pre id="out">⬅️ Bitte oben deinen Wunsch eingeben und auf „Plan generieren“ klicken.</pre>
+
+  <script>
+    const form = document.getElementById('f');
+    const out = document.getElementById('out');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const prompt = document.getElementById('prompt').value.trim();
+      if (!prompt) return;
+      out.textContent = "⏳ Erzeuge Plan …";
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      out.textContent = data.ok ? data.content : ("Fehler: " + (data.error || "unbekannt"));
+    });
+  </script>
+</body>
+</html>
