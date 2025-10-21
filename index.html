@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TripFlow – Smarte Tagesrouten</title>
 
+  <!-- Manifest + Theme Color (PWA) -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+
   <!-- Favicon / App-Icon -->
   <link rel="icon" href="/logo.png" />
 
@@ -53,7 +57,9 @@
           Plan generieren
         </button>
       </form>
-      <p class="mt-2 text-xs text-neutral-500">Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.</p>
+      <p class="mt-2 text-xs text-neutral-500">
+        Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.
+      </p>
     </section>
 
     <section class="rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-5">
@@ -71,7 +77,7 @@
   </footer>
 
   <script>
-    // Jahr
+    // Jahr automatisch aktualisieren
     document.getElementById('y').textContent = new Date().getFullYear();
 
     const form = document.getElementById('f');
@@ -88,13 +94,11 @@
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userMessage }) // <-- genau so erwartet es die API
+          body: JSON.stringify({ userMessage })
         });
 
         const data = await res.json();
-
         if (res.ok && data.output) {
-          // Markdown (mit Links/Bildern) sauber rendern
           outEl.innerHTML = window.marked ? marked.parse(data.output) : `<pre>${data.output}</pre>`;
         } else {
           outEl.innerHTML = `<p class="text-red-600">Fehler: ${data.error || 'Unbekannter Fehler'}</p>`;
