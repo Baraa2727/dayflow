@@ -1,4 +1,4 @@
-// /api/home.js – liefert index.html als HTML
+// /api/home.js – liefert index.html als HTML (Failsafe)
 import fs from "fs";
 import path from "path";
 
