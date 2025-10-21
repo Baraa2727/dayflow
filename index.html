@@ -15,7 +15,7 @@
             ink: '#0A0A0A',
             soft: '#F7F7F7',
             line: '#EAEAEA',
-            accent: '#111111'   // dezenter schwarzer Akzent
+            accent: '#111111'
           },
           boxShadow: {
             card: '0 6px 24px rgba(0,0,0,0.06)'
@@ -25,10 +25,10 @@
     }
   </script>
 
-  <!-- Markdown -->
+  <!-- Markdown Parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- Inter für cleanes UI -->
+  <!-- Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -39,11 +39,10 @@
   </style>
 </head>
 <body class="bg-white text-ink">
-  <!-- Header (ultra clean) -->
+  <!-- Header -->
   <header class="border-b border-line">
     <div class="mx-auto max-w-5xl px-5 h-14 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <!-- Logo-Platzhalter (ersetzbar) -->
         <div class="h-7 w-7 rounded-full bg-black text-white grid place-items-center text-[11px] font-bold">DF</div>
         <span class="text-sm font-semibold tracking-tight">DayFlow</span>
       </div>
@@ -54,7 +53,7 @@
     </div>
   </header>
 
-  <!-- Hero (weiß, viel Luft, klare Typo) -->
+  <!-- Hero -->
   <section class="border-b border-line">
     <div class="mx-auto max-w-5xl px-5 py-12 md:py-16">
       <p class="text-xs uppercase tracking-widest text-neutral-500">Tagesrouten, aber richtig</p>
@@ -76,11 +75,11 @@
     </div>
   </section>
 
-  <!-- Demo / App -->
+  <!-- Demo -->
   <main id="demo">
     <div class="mx-auto max-w-5xl px-5 py-12">
       <div class="grid md:grid-cols-5 gap-6">
-        <!-- Eingabe-Karte -->
+        <!-- Eingabe -->
         <section class="md:col-span-2 rounded-xl border border-line bg-white shadow-card p-5">
           <h2 class="text-base font-semibold">Wunsch eingeben</h2>
           <form id="f" class="mt-4 flex flex-col gap-3">
@@ -98,7 +97,7 @@
           </p>
         </section>
 
-        <!-- Ausgabe-Karte -->
+        <!-- Ausgabe -->
         <section class="md:col-span-3 rounded-xl border border-line bg-white shadow-card p-5">
           <div class="flex items-center justify-between">
             <h3 class="text-base font-semibold">Ausgabe</h3>
@@ -112,7 +111,7 @@
     </div>
   </main>
 
-  <!-- Features (schlicht, weiß) -->
+  <!-- Features -->
   <section id="features" class="border-t border-line">
     <div class="mx-auto max-w-5xl px-5 py-12 grid md:grid-cols-3 gap-6">
       <div class="rounded-xl border border-line p-5">
@@ -145,23 +144,24 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const prompt = document.getElementById('prompt').value.trim();
-      if (!prompt) return;
+      const userMessage = document.getElementById('prompt').value.trim();
+      if (!userMessage) return;
 
       outEl.innerHTML = '<p class="text-neutral-500">⏳ Erzeuge Plan …</p>';
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify({ prompt })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userMessage }) // ✅ geändert
         });
+
         const data = await res.json();
-        if (data.ok) {
-          outEl.innerHTML = marked.parse(data.content);
+        if (res.ok && data.output) {
+          outEl.innerHTML = marked.parse(data.output);
         } else {
           outEl.innerHTML = `<p class="text-red-600">Fehler: ${data.error || 'unbekannt'}</p>`;
         }
-      } catch {
+      } catch (err) {
         outEl.innerHTML = `<p class="text-red-600">Fehler beim Abruf.</p>`;
       }
     });
