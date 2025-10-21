@@ -1,8 +1,12 @@
 {
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/logo\\.png", "dest": "/logo.png" },
-    { "src": "/", "dest": "/api/home" },
-    { "src": "/(.*)", "dest": "/api/home" }
+
+    // Statische Dateien & Manifest direkt ausliefern:
+    { "src": "/(.*)\\.(png|jpg|jpeg|webp|svg|ico|json|css|js)", "dest": "/$1.$2" },
+
+    // Startseite & alle anderen Pfade -> index.html
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
