@@ -1,3 +1,7 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },   // API beibehalten
+    { "src": "/(logo\\.png)", "dest": "/$1" },  // Beispiel: statische Datei (Logo)
+    { "src": "/(.*)", "dest": "/index.html" }   // alle anderen Pfade -> index.html
+  ]
 }
