@@ -2,13 +2,11 @@
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" },
 
-    // Statische Assets & Manifest dürfen NICHT auf index.html umgeleitet werden:
     { "src": "/manifest\\.json", "dest": "/manifest.json" },
     { "src": "/app-icon\\.png", "dest": "/app-icon.png" },
     { "src": "/logo\\.png", "dest": "/logo.png" },
     { "src": "/(.*)\\.(png|jpg|jpeg|webp|svg|ico|json|css|js)", "dest": "/$1.$2" },
 
-    // Fallback: alles andere -> index.html (SPA)
     { "src": "/", "dest": "/index.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
