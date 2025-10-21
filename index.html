@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>DayFlow – Smarte Tagesrouten</title>
+  <title>TripFlow – Smarte Tagesrouten</title>
 
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,9 +13,7 @@
         extend: {
           colors: {
             ink: '#0A0A0A',
-            soft: '#F7F7F7',
-            line: '#EAEAEA',
-            accent: '#111111'
+            line: '#EAEAEA'
           },
           boxShadow: {
             card: '0 6px 24px rgba(0,0,0,0.06)'
@@ -39,100 +37,63 @@
   </style>
 </head>
 <body class="bg-white text-ink">
-  <!-- Header -->
+  <!-- Header (nur Logo + Name) -->
   <header class="border-b border-line">
-    <div class="mx-auto max-w-5xl px-5 h-14 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="h-7 w-7 rounded-full bg-black text-white grid place-items-center text-[11px] font-bold">DF</div>
-        <span class="text-sm font-semibold tracking-tight">DayFlow</span>
+    <div class="mx-auto max-w-5xl px-5 h-14 flex items-center gap-3">
+      <!-- Runder Logo-Button -->
+      <div class="relative h-9 w-9 shrink-0 rounded-full ring-1 ring-black/10 overflow-hidden bg-black">
+        <!-- Lege die Datei unter /public/logo.png (siehe Hinweis unten) -->
+        <img src="/logo.png" alt="TripFlow Logo" class="h-full w-full object-cover" />
       </div>
-      <nav class="hidden sm:flex items-center gap-6 text-sm text-neutral-500">
-        <a class="hover:text-ink" href="#demo">Demo</a>
-        <a class="hover:text-ink" href="#features">Funktionen</a>
-      </nav>
+      <span class="text-sm font-semibold tracking-tight">TripFlow</span>
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- Hero (kompakt) -->
   <section class="border-b border-line">
-    <div class="mx-auto max-w-5xl px-5 py-12 md:py-16">
-      <p class="text-xs uppercase tracking-widest text-neutral-500">Tagesrouten, aber richtig</p>
-      <h1 class="mt-3 text-4xl md:text-6xl font-semibold leading-tight">
-        Dein smarter Tagesablauf<br class="hidden md:block"> mit klarer Route & Flow.
+    <div class="mx-auto max-w-5xl px-5 py-10 md:py-14">
+      <h1 class="text-3xl md:text-5xl font-semibold leading-tight">
+        Smarte Tagesrouten – klar, klickbar, ready.
       </h1>
-      <p class="mt-4 text-lg text-neutral-600 max-w-2xl">
-        Minutengenaue A–F-Stopps, einzeiliger Google-Maps-Link, passende Restaurants und Alternativen.
+      <p class="mt-3 text-neutral-600 max-w-2xl">
+        A–G Stopps mit Essen & Spaziergängen, einzeiliger Google-Maps-Routenlink, Bilder pro Stopp.
       </p>
-
-      <div class="mt-7 flex gap-3">
-        <a href="#demo" class="inline-flex items-center rounded-lg bg-ink text-white px-4 py-2.5 text-sm font-medium hover:bg-black">
-          Jetzt testen
-        </a>
-        <a href="#features" class="inline-flex items-center rounded-lg border border-line px-4 py-2.5 text-sm font-medium hover:bg-soft">
-          Mehr erfahren
-        </a>
-      </div>
     </div>
   </section>
 
-  <!-- Demo -->
-  <main id="demo">
-    <div class="mx-auto max-w-5xl px-5 py-12">
+  <!-- App: Eingabe + Ausgabe -->
+  <main>
+    <div class="mx-auto max-w-5xl px-5 py-10">
       <div class="grid md:grid-cols-5 gap-6">
         <!-- Eingabe -->
         <section class="md:col-span-2 rounded-xl border border-line bg-white shadow-card p-5">
-          <h2 class="text-base font-semibold">Wunsch eingeben</h2>
+          <h2 class="text-base font-semibold">Wunsch</h2>
           <form id="f" class="mt-4 flex flex-col gap-3">
             <input
               id="prompt"
               class="rounded-lg border border-line px-3.5 py-2.5 text-[15px] outline-none focus:ring-2 focus:ring-neutral-900/10"
-              placeholder="z. B. 1 Tag in Lissabon – Aussicht & vegetarisch"
+              placeholder="z. B. 1 Tag in Wuppertal – entspannt & vegetarisch"
             />
             <button type="submit" class="rounded-lg bg-ink text-white px-4 py-2.5 text-sm font-medium hover:bg-black">
               Plan generieren
             </button>
           </form>
-          <p class="mt-3 text-sm text-neutral-500">
-            Tipp: Ziel + Tage + Stil (z. B. „2 Tage Rom, Kultur & Pizza“).
-          </p>
         </section>
 
         <!-- Ausgabe -->
         <section class="md:col-span-3 rounded-xl border border-line bg-white shadow-card p-5">
-          <div class="flex items-center justify-between">
-            <h3 class="text-base font-semibold">Ausgabe</h3>
-            <span class="text-xs text-neutral-500">Mock aktiv</span>
-          </div>
+          <h3 class="text-base font-semibold">Ausgabe</h3>
           <div id="out" class="prose max-w-none mt-3">
-            <p class="text-neutral-500">⬅️ Bitte oben deinen Wunsch eingeben und auf „Plan generieren“ klicken.</p>
+            <p class="text-neutral-500">⬅️ Wunsch eingeben und „Plan generieren“ klicken.</p>
           </div>
         </section>
       </div>
     </div>
   </main>
 
-  <!-- Features -->
-  <section id="features" class="border-t border-line">
-    <div class="mx-auto max-w-5xl px-5 py-12 grid md:grid-cols-3 gap-6">
-      <div class="rounded-xl border border-line p-5">
-        <h4 class="text-sm font-semibold mb-1">A–F Stopps</h4>
-        <p class="text-neutral-600">Klar strukturierte Tagesrouten mit Zeiten & Transfer.</p>
-      </div>
-      <div class="rounded-xl border border-line p-5">
-        <h4 class="text-sm font-semibold mb-1">Maps-Links</h4>
-        <p class="text-neutral-600">Einzeiliger Routenlink, klickbare Stopps (Titel & Bild identisch).</p>
-      </div>
-      <div class="rounded-xl border border-line p-5">
-        <h4 class="text-sm font-semibold mb-1">Mock-Modus</h4>
-        <p class="text-neutral-600">Kostenlos entwickeln; später mit OpenAI-API live schalten.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
   <footer class="border-t border-line">
     <div class="mx-auto max-w-5xl px-5 py-10 text-center text-sm text-neutral-500">
-      © <span id="y"></span> DayFlow
+      © <span id="y"></span> TripFlow
     </div>
   </footer>
 
@@ -152,7 +113,7 @@
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userMessage }) // ✅ geändert
+          body: JSON.stringify({ userMessage }) // <- erwartet die API
         });
 
         const data = await res.json();
