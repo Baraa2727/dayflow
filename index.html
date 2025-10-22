@@ -7,19 +7,16 @@
 
   <!-- PWA / Manifest -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#ffffff" />
 
   <!-- Icons -->
   <link rel="icon" href="/logo.png" />
-  <!-- iOS Homescreen-Icon (Safari nutzt das bevorzugt) -->
   <link rel="apple-touch-icon" href="/app-icon.png" />
-  <!-- Optional: sauberes Icon für iOS-Retina -->
   <link rel="apple-touch-icon" sizes="180x180" href="/app-icon-180.png" />
 
-  <!-- Tailwind via CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Markdown Parser -->
+  <!-- Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Fonts -->
@@ -29,11 +26,38 @@
 
   <style>
     :root { color-scheme: light; }
-    body { font-family: Inter, ui-sans-serif, -apple-system, Segoe UI, Roboto, system-ui; }
-    .prose a { text-decoration: underline; }
+    html, body { height: 100%; }
+    body { font-family: Inter, ui-sans-serif, -apple-system, Segoe UI, Roboto, system-ui; background:#fff; }
+
+    /* Splash Animations */
+    @keyframes splash-in {
+      0%   { opacity: 0; transform: scale(.96); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    @keyframes splash-out {
+      0%   { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(1.02); }
+    }
+    .splash-in  { animation: splash-in 420ms ease-out forwards; }
+    .splash-out { animation: splash-out 420ms ease-in forwards; }
   </style>
 </head>
 <body class="bg-white text-neutral-900">
+
+  <!-- Splash Overlay (nur PWA/Standalone sichtbar) -->
+  <div id="splash"
+       class="fixed inset-0 z-50 grid place-items-center bg-white"
+       aria-hidden="true" hidden>
+    <div class="flex flex-col items-center gap-3 splash-in">
+      <!-- Rundes Logo im Kreis -->
+      <div class="w-20 h-20 rounded-full ring-1 ring-black/10 overflow-hidden bg-black grid place-items-center">
+        <!-- Nimm hier dein App-Icon oder Logo -->
+        <img src="/app-icon.png" alt="TripFlow" class="w-full h-full object-cover" />
+      </div>
+      <div class="text-sm font-semibold tracking-tight text-neutral-800">TripFlow</div>
+    </div>
+  </div>
+
   <!-- Navbar -->
   <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-neutral-200">
     <div class="mx-auto max-w-3xl px-4 h-14 flex items-center gap-3">
@@ -43,7 +67,7 @@
   </header>
 
   <!-- App -->
-  <main class="mx-auto max-w-3xl px-4 py-6 md:py-10">
+  <main id="app" class="mx-auto max-w-3xl px-4 py-6 md:py-10 opacity-0">
     <h1 class="text-3xl md:text-4xl font-semibold leading-tight mb-6">
       Smarte Tagesrouten – klar, klickbar, ready.
     </h1>
@@ -61,9 +85,7 @@
           Plan generieren
         </button>
       </form>
-      <p class="mt-2 text-xs text-neutral-500">
-        Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.
-      </p>
+      <p class="mt-2 text-xs text-neutral-500">Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.</p>
     </section>
 
     <section class="rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-5">
@@ -84,6 +106,35 @@
     // Jahr
     document.getElementById('y').textContent = new Date().getFullYear();
 
+    // Splash nur in PWA/Standalone zeigen
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    const splash = document.getElementById('splash');
+    const app   = document.getElementById('app');
+
+    if (isStandalone && splash) {
+      splash.hidden = false; // zeigen
+      // App leicht verzögert einblenden, während Splash ausblendet
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          // Splash-Out
+          const inner = splash.firstElementChild;
+          if (inner) inner.classList.remove('splash-in'), inner.classList.add('splash-out');
+
+          // App einblenden
+          app.style.transition = 'opacity 360ms ease-out';
+          app.style.opacity = '1';
+
+          // Splash entfernen
+          setTimeout(() => { splash.remove(); }, 420);
+        }, 380); // Splash-Dauer ~0.38s
+      });
+    } else {
+      // Kein Standalone: App sofort zeigen
+      app.style.opacity = '1';
+      if (splash) splash.remove();
+    }
+
+    // Form Handler
     const form = document.getElementById('f');
     const outEl = document.getElementById('out');
 
