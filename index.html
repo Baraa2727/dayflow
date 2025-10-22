@@ -11,10 +11,10 @@
     <style>
       :root { --bg:#fff; --fg:#111418; --muted:#6b7280; --ring:rgba(0,0,0,.08); }
       *{box-sizing:border-box} html,body{height:100%}
-      /* Verhindert Flicker: Seite initial unsichtbar, nur Splash sichtbar */
+      /* Anti-Flicker: App unsichtbar bis Splash endet */
       body{margin:0;color:var(--fg);background:#000;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
-      body.ready{background:var(--bg);} /* nach Splash */
       #app{visibility:hidden}
+      body.ready{background:var(--bg)}
       body.ready #app{visibility:visible}
 
       a{color:inherit;text-decoration:none} button,input,textarea{outline:none;border:0;background:transparent}
@@ -24,7 +24,10 @@
       .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 8px}
       .brand{display:flex;align-items:center;gap:10px;font-weight:800}
       .brand img{width:28px;height:28px;border-radius:50%}
-      .user{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;border:1px solid #e5e7eb}
+      /* User-Button präzise mittig + schwarze Linien */
+      .user{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 1px #e5e7eb inset;background:#fff}
+      .user svg{width:18px;height:18px;stroke:#111;fill:none}
+
       .h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:14px 0 4px;font-weight:900}
       .h2{color:var(--muted);margin:0 0 18px}
 
@@ -34,16 +37,13 @@
 
       .iconbtn{position:absolute;top:50%;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;border-radius:12px}
       .iconbtn:active{transform:translateY(-50%) scale(.98)}
-      .mic{left:6px} .send{right:6px} /* clip nur in Chat */
+      .mic{left:6px} .send{right:6px}
       .iconbtn svg{width:18px;height:18px;fill:#000;stroke:#000}
       .recording svg{animation:blink .9s steps(2,end) infinite}
       @keyframes blink{50%{opacity:.25}}
 
-      .examples{display:flex;gap:8px;align-items:center;margin:10px 4px 0;color:var(--muted);font-size:13px}
-      .examples label{display:none} /* "Beispiele:" ausblenden */
-      .roller{position:relative;height:18px;overflow:hidden;width:100%}
-      .roller span{position:absolute;left:0;top:0;opacity:0;transition:opacity .6s ease}
-      .roller span.show{opacity:1}
+      /* Beispiele unter der Box komplett ausblenden (wir zeigen sie im Placeholder) */
+      .examples{display:none}
 
       footer{text-align:center;font-size:12px;color:var(--muted);padding:28px 0}
 
@@ -66,7 +66,9 @@
 
       .sheet{position:fixed;left:0;right:0;bottom:-100%;background:#fff;box-shadow:0 -8px 30px rgba(0,0,0,.15);border-radius:18px 18px 0 0;padding:16px;transition:bottom .25s ease;z-index:50}
       .sheet.open{bottom:0}
-      .sheet h4{margin:6px 0 12px}.sheet ul{list-style:none;padding:0;margin:0}.sheet li{padding:14px 6px;border-bottom:1px solid #eee}.sheet a{display:block}
+      .sheet ul{list-style:none;padding:0;margin:0}
+      .sheet li{padding:14px 6px;border-bottom:1px solid #eee}
+      .sheet a{display:block}
     </style>
   </head>
   <body>
@@ -85,7 +87,7 @@
           <img src="/logo.png" alt="TripFlow" /><div>TripFlow</div>
         </a>
         <button id="userBtn" class="user" aria-label="Profil öffnen">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
         </button>
       </header>
 
@@ -96,8 +98,7 @@
           <p class="h2">Klar, klickbar, ready.</p>
 
           <section class="inputWrap">
-            <textarea id="prompt" class="prompt" placeholder="Erstelle eine Tagestour in Berlin bei Regen." rows="2"></textarea>
-            <!-- Mic zurück auf Home -->
+            <textarea id="prompt" class="prompt" placeholder="" rows="2"></textarea>
             <button id="micBtn" class="iconbtn mic" aria-label="Spracheingabe starten">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 19v3"/></svg>
             </button>
@@ -106,11 +107,7 @@
             </button>
           </section>
 
-          <div class="examples" id="examples">
-            <label>Beispiele:</label>
-            <div class="roller" aria-hidden="true"><span id="exLine"></span></div>
-          </div>
-
+          <!-- Beispiele unten sind entfernt -->
           <footer>© <span id="year"></span> TripFlow</footer>
         </div>
       </main>
@@ -145,12 +142,10 @@
       </section>
 
       <!-- Bottom Sheet -->
-      <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Menü">
-        <h4>Menü</h4>
+      <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Schnellmenü">
         <ul>
+          <li><a href="#/" id="newTrip">Neue Reise</a></li>
           <li><a href="#/trips" id="openTrips">Meine Reisen</a></li>
-          <li><a href="#">Einstellungen (bald)</a></li>
-          <li><a href="#">Hilfe (bald)</a></li>
         </ul>
       </div>
     </div>
@@ -159,7 +154,7 @@
       const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
       document.getElementById('year').textContent=new Date().getFullYear();
 
-      // Splash sauber: erst nach Ende Seite zeigen, um Flicker zu verhindern
+      // Splash: erst nach Ende App zeigen (kein Flicker)
       const splash=document.getElementById('splash');
       function reveal(){ document.body.classList.add('ready'); splash.remove(); }
       splash.addEventListener('animationend',reveal);
@@ -169,106 +164,91 @@
       const sheet=document.getElementById('sheet');
       document.getElementById('userBtn').addEventListener('click',()=> sheet.classList.toggle('open'));
       sheet.addEventListener('click',(e)=>{ if(e.target===sheet) sheet.classList.remove('open'); });
+      document.getElementById('newTrip').addEventListener('click',()=>{ location.hash='#/'; sheet.classList.remove('open'); });
+      document.getElementById('openTrips').addEventListener('click',()=> sheet.classList.remove('open'));
 
-      // Beispiele (Fade-Ticker)
-      const EXAMPLES=[
-        'Ich bin in Lissabon – plane einen halben Tag mit Aussichtspunkten.',
-        'Streetfood in Bangkok + Rooftop-Bar am Ende.',
-        'Familientag in München bei Regen – Indoor & Café.',
-        'Rom: antike Highlights + Gelato-Stopps.',
-        'Tokio: trendige Viertel & ein kurzer Spaziergang.'
+      // Placeholder-Rotation (im Textfeld, nicht darunter)
+      const PHRASES=[
+        'Ich bin in Lissabon – was soll ich heute machen?',
+        'Erstelle eine Tagestour in Berlin bei Regen',
+        'Plan mir 2 Tage in Barcelona mit Sightseeing und Restauranttipps.',
+        'Mach mir eine Wochenendroute für Wandern im Schwarzwald'
       ];
-      const exEl=document.getElementById('exLine'); let exIdx=0;
-      function nextExample(){ exEl.classList.remove('show'); setTimeout(()=>{ exEl.textContent=EXAMPLES[exIdx%EXAMPLES.length]; exEl.classList.add('show'); exIdx++; },250); }
-      nextExample(); const exInt=setInterval(nextExample,3500);
-      const promptEl=document.getElementById('prompt'); const examples=document.getElementById('examples');
-      function hideExamples(){ examples.style.display='none'; clearInterval(exInt); }
-      promptEl.addEventListener('focus',hideExamples,{once:true}); promptEl.addEventListener('input',hideExamples,{once:true});
+      const promptEl=document.getElementById('prompt');
+      let pIdx=0, pTimer=null;
+      function startPlaceholderCycle(){
+        stopPlaceholderCycle();
+        function tick(){ promptEl.setAttribute('placeholder', PHRASES[pIdx%PHRASES.length]); pIdx++; }
+        tick(); pTimer=setInterval(tick, 3500);
+      }
+      function stopPlaceholderCycle(){ if(pTimer){ clearInterval(pTimer); pTimer=null; } }
+      // Stop, sobald der/die User:in tippt – beim Zurückkehren zur Startseite starten wir neu
+      promptEl.addEventListener('focus', stopPlaceholderCycle);
+      promptEl.addEventListener('input', stopPlaceholderCycle);
 
       // Router
-      const routes={'#/':()=>show('home'),'#/chat':()=>show('chat'),'#/trips':()=>{renderTrips();show('trips');}};
+      const routes={'#/':()=>{ show('home'); promptEl.value=''; startPlaceholderCycle(); }, '#/chat':()=>show('chat'), '#/trips':()=>{renderTrips(); show('trips');}};
       function show(n){ $$('.view').forEach(v=>v.classList.remove('active')); document.getElementById('view-'+n).classList.add('active'); }
       function onRoute(){ (routes[location.hash]||routes['#/'])(); sheet.classList.remove('open'); }
       window.addEventListener('hashchange',onRoute); onRoute();
       document.getElementById('homeLink').addEventListener('click',()=>{ location.hash='#/'; });
 
       // Storage
-      const store={ key:'tripflow_trips',
-        all(){ try{return JSON.parse(localStorage.getItem(this.key)||'[]');}catch{return[]} },
-        save(list){ localStorage.setItem(this.key,JSON.stringify(list)); },
-        add(trip){ const list=this.all(); list.unshift(trip); this.save(list); }
-      };
-      function renderTrips(){
-        const list=store.all(), box=document.getElementById('tripList');
-        if(!list.length){ box.innerHTML='<p>Noch keine Reisen – starte eine neue Anfrage auf der Startseite.</p>'; return; }
-        box.innerHTML=list.map(t=>`<div style="padding:10px 0;border-bottom:1px solid #eee"><a href="#/chat" data-id="${t.id}"><strong>${t.title}</strong><br><small>${new Date(t.created).toLocaleString()}</small></a></div>`).join('');
-        Array.from(document.querySelectorAll('#tripList a')).forEach(a=>a.addEventListener('click',e=>{e.preventDefault();loadChat(a.getAttribute('data-id'));}));
+      const store={ key:'tripflow_trips', all(){ try{return JSON.parse(localStorage.getItem(this.key)||'[]');}catch{return[]} }, save(l){ localStorage.setItem(this.key,JSON.stringify(l)); }, add(t){ const l=this.all(); l.unshift(t); this.save(l); } };
+      function renderTrips(){ const list=store.all(), box=document.getElementById('tripList'); if(!list.length){ box.innerHTML='<p>Noch keine Reisen – starte eine neue Anfrage auf der Startseite.</p>'; return; } box.innerHTML=list.map(t=>`<div style="padding:10px 0;border-bottom:1px solid #eee"><a href="#/chat" data-id="${t.id}"><strong>${t.title}</strong><br><small>${new Date(t.created).toLocaleString()}</small></a></div>`).join(''); Array.from(document.querySelectorAll('#tripList a')).forEach(a=>a.addEventListener('click',e=>{e.preventDefault();loadChat(a.getAttribute('data-id'));})); }
+
+      // City-Extractor (Mock/Heuristik)
+      const KNOWN_CITIES=['Berlin','Lissabon','Lisboa','Barcelona','München','Rom','Tokio','Bangkok','Schwarzwald','Hamburg','Paris','London','Wien','Zürich'];
+      function extractCity(q){
+        for(const c of KNOWN_CITIES){ const re=new RegExp(`\b${c}\b`,'i'); if(re.test(q)) return c; }
+        // fallback: erstes Wort mit Großbuchstabe
+        const m=q.match(/([A-ZÄÖÜ][a-zäöüß]+(?:-[A-ZÄÖÜ][a-zäöüß]+)?)/); return m?m[1]:'Reise';
       }
 
       // Chat Rendering
-      let currentTripId=null;
-      function appendMsg(text,me=false){
-        const el=document.createElement('div'); el.className='msg'+(me?' me':'');
-        el.innerHTML=String(text).replace(/\n/g,'<br>');
-        const body=document.getElementById('chatBody'); body.appendChild(el); body.scrollTop=body.scrollHeight;
-      }
-      function newTrip(title,firstMsg){
-        currentTripId='t_'+Date.now();
-        const trip={id:currentTripId,title,created:Date.now(),messages:[{role:'user',content:firstMsg}]};
-        store.add(trip); renderTrips(); loadChat(currentTripId);
-      }
-      function loadChat(id){
-        const t=store.all().find(x=>x.id===id); if(!t){ location.hash='#/trips'; return; }
-        currentTripId=id; document.getElementById('chatBody').innerHTML='';
-        t.messages.forEach(m=>appendMsg(m.content,m.role==='user'));
-        location.hash='#/chat';
-      }
+      let currentTripId=null, loadingEl=null;
+      function appendMsg(text,me=false){ const el=document.createElement('div'); el.className='msg'+(me?' me':''); el.innerHTML=String(text).replace(/
+/g,'<br>'); const body=document.getElementById('chatBody'); body.appendChild(el); body.scrollTop=body.scrollHeight; return el; }
+      function newTrip(title,firstMsg){ currentTripId='t_'+Date.now(); const trip={id:currentTripId,title,created:Date.now(),messages:[{role:'user',content:firstMsg}]}; store.add(trip); renderTrips(); loadChat(currentTripId); }
+      function loadChat(id){ const t=store.all().find(x=>x.id===id); if(!t){ location.hash='#/trips'; return; } currentTripId=id; document.getElementById('chatBody').innerHTML=''; t.messages.forEach(m=>appendMsg(m.content,m.role==='user')); location.hash='#/chat'; }
       function saveAssistantMessage(content){ const list=store.all(); const t=list.find(x=>x.id===currentTripId); if(!t) return; t.messages.push({role:'assistant',content}); store.save(list); }
       function saveUserMessage(content){ const list=store.all(); const t=list.find(x=>x.id===currentTripId); if(!t) return; t.messages.push({role:'user',content}); store.save(list); }
 
-      // Mic (zurück)
+      // Mic (Home + Chat)
       let recognition,listening=false; const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      if(SR){ recognition=new SR(); recognition.lang='de-DE'; recognition.interimResults=true; recognition.maxAlternatives=1;
-        recognition.addEventListener('result',(e)=>{ let tx=''; for(let i=e.resultIndex;i<e.results.length;i++){ tx+=e.results[i][0].transcript; } promptEl.value=tx.trim(); });
-        recognition.addEventListener('end',()=>{ listening=false; document.getElementById('micBtn').classList.remove('recording'); });
-        document.getElementById('micBtn').addEventListener('click',()=>{ if(!listening){ try{ recognition.start(); listening=true; document.getElementById('micBtn').classList.add('recording'); }catch(e){} } else { recognition.stop(); } });
-        document.getElementById('chatMic')?.addEventListener('click',()=>{ if(!listening){ try{ recognition.start(); listening=true; }catch(e){} } else { recognition.stop(); } });
+      function startMic(btn,target){ if(!SR) return alert('Spracheingabe wird nicht unterstützt.'); if(!recognition){ recognition=new SR(); recognition.lang='de-DE'; recognition.interimResults=true; recognition.maxAlternatives=1; recognition.addEventListener('result',(e)=>{ let tx=''; for(let i=e.resultIndex;i<e.results.length;i++){ tx+=e.results[i][0].transcript; } target.value=tx.trim(); }); recognition.addEventListener('end',()=>{ listening=false; btn.classList.remove('recording'); }); }
+        if(!listening){ try{ recognition.start(); listening=true; btn.classList.add('recording'); }catch(e){} } else { recognition.stop(); }
       }
+      document.getElementById('micBtn').addEventListener('click',()=> startMic(document.getElementById('micBtn'), promptEl));
+      document.getElementById('chatMic').addEventListener('click',()=> startMic(document.getElementById('chatMic'), document.getElementById('chatInput')));
 
-      // Send
-      document.getElementById('sendBtn').addEventListener('click',async()=>{
-        const q=promptEl.value.trim(); if(!q){ promptEl.focus(); return; }
-        newTrip(q,q); await sendInChat(q);
-      });
-      document.getElementById('chatSend').addEventListener('click',async()=>{
-        const inp=document.getElementById('chatInput'); const q=inp.value.trim(); if(!q) return; appendMsg(q,true); saveUserMessage(q); inp.value=''; await sendInChat(q);
-      });
+      // Senden
+      document.getElementById('sendBtn').addEventListener('click',async()=>{ const q=promptEl.value.trim()||promptEl.getAttribute('placeholder'); if(!q){ promptEl.focus(); return; } const city=extractCity(q); newTrip(city, q); await sendInChat(q); });
+      document.getElementById('chatSend').addEventListener('click',async()=>{ const inp=document.getElementById('chatInput'); const q=inp.value.trim(); if(!q) return; appendMsg(q,true); saveUserMessage(q); inp.value=''; await sendInChat(q); });
 
       async function sendInChat(q){
-        appendMsg('⏳ Generiere Plan…');
+        loadingEl=appendMsg('🧭 <i>TripFlow denkt…</i>');
         try{
           const res=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:q})});
           const data=await res.json();
-          const text=((data&&(data.plan||data.text||data.content))||JSON.stringify(data))+'\n\n<i>Bitte überprüfe Route, Adressen und Namen – die KI kann vereinzelt Fehler machen.</i>';
+          loadingEl.remove();
+          const text=((data&&(data.plan||data.text||data.content))||JSON.stringify(data))+'
+
+<i>Bitte überprüfe Route, Adressen und Namen – die KI kann vereinzelt Fehler machen.</i>';
           appendMsg(text); saveAssistantMessage(text);
-        }catch(err){ appendMsg('❌ Fehler beim Generieren. Bitte später erneut versuchen.'); }
+        }catch(err){
+          loadingEl.remove();
+          const mock=`<b>Plan (Mock)</b><br>• A: Café zum Start<br>• B: Sehenswürdigkeit<br>• C: Mittagessen<br>• D: Spaziergang<br>• E: Aussichtspunkt<br>• F: Abendessen<br>• G: Bar – Abschluss`;
+          appendMsg(mock); saveAssistantMessage(mock);
+        }
       }
 
       // Clip (keine Bilder)
-      function setupNoImageAttach(btn){
-        if(!btn) return; const input=document.createElement('input'); input.type='file'; input.accept='.txt,.pdf,.csv,.md,.json'; input.multiple=true; input.style.display='none'; document.body.appendChild(input);
-        btn.addEventListener('click',()=> input.click());
-        input.addEventListener('change',()=>{ const names=[...input.files].map(f=>f.name).join(', '); alert('Dateien angehängt: '+names+' (Bildformate sind deaktiviert)'); });
-      }
-      setupNoImageAttach(document.getElementById('chatClip'));
-
-      document.getElementById('openTrips').addEventListener('click',()=> sheet.classList.remove('open'));
+      (function setupNoImageAttach(btn){ if(!btn) return; const input=document.createElement('input'); input.type='file'; input.accept='.txt,.pdf,.csv,.md,.json'; input.multiple=true; input.style.display='none'; document.body.appendChild(input); btn.addEventListener('click',()=> input.click()); input.addEventListener('change',()=>{ const names=[...input.files].map(f=>f.name).join(', '); alert('Dateien angehängt: '+names+' (Bildformate sind deaktiviert)'); }); })(document.getElementById('chatClip'));
     </script>
 
     <script>
-      if('serviceWorker' in navigator){
-        window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
-      }
+      if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }); }
     </script>
   </body>
 </html>
