@@ -12,10 +12,8 @@
       :root { --bg:#fff; --fg:#111418; --muted:#6b7280; --ring:rgba(0,0,0,.08); }
       *{box-sizing:border-box} html,body{height:100%}
       /* Anti-Flicker: App unsichtbar bis Splash endet */
-      body{margin:0;color:var(--fg);background:#000;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
-      #app{visibility:hidden}
-      body.ready{background:var(--bg)}
-      body.ready #app{visibility:visible}
+      body{margin:0;color:var(--fg);background:var(--bg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
+      
 
       a{color:inherit;text-decoration:none} button,input,textarea{outline:none;border:0;background:transparent}
       #vercel-toolbar,[data-vercel-insights-overlay],.vercel-insights,.__vercel,[data-cka-fab],.nextjs-portal{display:none!important}
@@ -154,11 +152,10 @@
       const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
       document.getElementById('year').textContent=new Date().getFullYear();
 
-      // Splash: erst nach Ende App zeigen (kein Flicker)
-      const splash=document.getElementById('splash');
-      function reveal(){ document.body.classList.add('ready'); splash.remove(); }
-      splash.addEventListener('animationend',reveal);
-      setTimeout(()=>{ if(document.getElementById('splash')) reveal(); }, 3200);
+      // Splash entfernt sich nach der Animation; App ist immer sichtbar darunter
+const splash=document.getElementById('splash');
+splash.addEventListener('animationend',()=>{ splash.remove(); });
+setTimeout(()=>{ if(document.getElementById('splash')) splash.remove(); }, 3500);
 
       // Bottom sheet
       const sheet=document.getElementById('sheet');
