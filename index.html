@@ -7,16 +7,15 @@
 
   <!-- PWA / Manifest -->
   <link rel="manifest" href="/manifest.json" />
-  <meta name="theme-color" content="#000000" />
+  <meta name="theme-color" content="#ffffff" />
 
   <!-- Icons -->
   <link rel="icon" href="/logo.png" />
   <link rel="apple-touch-icon" href="/app-icon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/app-icon-180.png" />
 
-  <!-- Tailwind -->
+  <!-- Tailwind & Markdown -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Fonts -->
@@ -25,82 +24,74 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
   <style>
-    :root { color-scheme: dark light; }
     html, body { height: 100%; }
-    body { font-family: Inter, ui-sans-serif, -apple-system, Segoe UI, Roboto, system-ui; }
+    body { font-family: Inter, ui-sans-serif, -apple-system, Segoe UI, Roboto, system-ui; background:#fff; color:#111827; }
 
-    /* Splash Animations - länger & smoother */
-    @keyframes splash-in {
-      0%   { opacity: 0; transform: scale(.96); }
-      100% { opacity: 1; transform: scale(1); }
-    }
-    @keyframes splash-out {
-      0%   { opacity: 1; transform: scale(1); }
-      100% { opacity: 0; transform: scale(1.03); }
-    }
-    .splash-in  { animation: splash-in 700ms ease-out forwards; }
-    .splash-out { animation: splash-out 700ms ease-in forwards; }
+    /* Splash – schwarz, etwas länger */
+    @keyframes splash-in   { 0%{opacity:0;transform:scale(.96)} 100%{opacity:1;transform:scale(1)} }
+    @keyframes splash-out  { 0%{opacity:1;transform:scale(1)}   100%{opacity:0;transform:scale(1.03)} }
+    .splash-in  { animation: splash-in 800ms ease-out forwards; }
+    .splash-out { animation: splash-out 800ms ease-in forwards; }
   </style>
 </head>
-<body class="bg-neutral-950 text-white">
+<body>
 
-  <!-- Splash Overlay (schwarz) -->
-  <div id="splash" class="fixed inset-0 z-50 grid place-items-center bg-neutral-950" aria-hidden="true" hidden>
+  <!-- Splash (nur Overlay ist schwarz) -->
+  <div id="splash" class="fixed inset-0 z-50 grid place-items-center bg-black" aria-hidden="true" hidden>
     <div class="flex flex-col items-center gap-3 splash-in">
-      <div class="w-20 h-20 rounded-full ring-1 ring-white/10 overflow-hidden bg-black grid place-items-center">
+      <div class="w-20 h-20 rounded-full ring-1 ring-white/15 overflow-hidden bg-black grid place-items-center">
         <img src="/app-icon.png" alt="TripFlow" class="w-full h-full object-cover" />
       </div>
       <div class="text-sm font-semibold tracking-tight text-white/90">TripFlow</div>
     </div>
   </div>
 
-  <!-- Navbar -->
-  <header class="sticky top-0 z-10 bg-neutral-950/80 backdrop-blur border-b border-white/10">
+  <!-- Navbar (hell) -->
+  <header class="sticky top-0 z-10 bg-white/80 backdrop-blur border-b border-neutral-200">
     <div class="mx-auto max-w-3xl px-4 h-14 flex items-center gap-3">
-      <img src="/logo.png" alt="TripFlow" class="w-9 h-9 rounded-full ring-1 ring-white/10 object-cover" />
+      <img src="/logo.png" alt="TripFlow" class="w-9 h-9 rounded-full ring-1 ring-black/10 object-cover" />
       <span class="text-sm font-semibold tracking-tight">TripFlow</span>
     </div>
   </header>
 
-  <!-- App -->
+  <!-- App (hell) -->
   <main id="app" class="mx-auto max-w-3xl px-4 py-6 md:py-10 opacity-0">
     <h1 class="text-3xl md:text-4xl font-semibold leading-tight mb-6">Smarte Tagesrouten – klar, klickbar, ready.</h1>
 
-    <section class="rounded-2xl border border-white/10 bg-neutral-900/50 shadow-sm p-4 md:p-5 mb-6">
+    <section class="rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-5 mb-6">
       <form id="f" class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
         <input
           id="prompt"
-          class="rounded-xl border border-white/10 bg-neutral-900 text-white placeholder-white/50 px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-white/20"
+          class="rounded-xl border border-neutral-200 px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-neutral-900/10"
           placeholder="z. B. 1 Tag in Düsseldorf – entspannt, vegetarisch"
           aria-label="Reise-Wunsch"
         />
         <button type="submit"
-          class="rounded-xl bg-white text-black px-5 py-3 text-sm font-medium hover:bg-neutral-200 active:scale-[.99] transition">
+          class="rounded-xl bg-black text-white px-5 py-3 text-sm font-medium hover:bg-neutral-900 active:scale-[.99] transition">
           Plan generieren
         </button>
       </form>
-      <p class="mt-2 text-xs text-white/60">Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.</p>
+      <p class="mt-2 text-xs text-neutral-500">Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.</p>
     </section>
 
-    <section class="rounded-2xl border border-white/10 bg-neutral-900/50 shadow-sm p-4 md:p-5">
+    <section class="rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-5">
       <h2 class="text-base font-semibold">Ausgabe</h2>
-      <div id="out" class="prose max-w-none mt-3 prose-invert">
-        <p class="text-white/70">Gib oben deinen Wunsch ein und klicke auf <em>Plan generieren</em>.</p>
+      <div id="out" class="prose max-w-none mt-3">
+        <p class="text-neutral-500">Gib oben deinen Wunsch ein und klicke auf <em>Plan generieren</em>.</p>
       </div>
     </section>
   </main>
 
-  <footer class="border-t border-white/10">
-    <div class="mx-auto max-w-3xl px-4 py-10 text-center text-sm text-white/50">
+  <footer class="border-t border-neutral-200">
+    <div class="mx-auto max-w-3xl px-4 py-10 text-center text-sm text-neutral-500">
       © <span id="y"></span> TripFlow
     </div>
   </footer>
 
   <script>
-    // Jahr
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Standalone/PWA erkennen
+    // PWA erkennen (Homescreen)
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const splash = document.getElementById('splash');
     const app   = document.getElementById('app');
@@ -108,14 +99,14 @@
     if (isStandalone && splash) {
       splash.hidden = false;
       window.addEventListener('load', () => {
-        // Splash etwas länger stehen lassen
+        // Splash etwas länger sichtbar lassen (~0.8s)
         setTimeout(() => {
           const inner = splash.firstElementChild;
           if (inner) inner.classList.remove('splash-in'), inner.classList.add('splash-out');
-          app.style.transition = 'opacity 600ms ease-out';
+          app.style.transition = 'opacity 700ms ease-out';
           app.style.opacity = '1';
-          setTimeout(() => { splash.remove(); }, 720);
-        }, 700); // sichtbare Dauer ~0.7s
+          setTimeout(() => { splash.remove(); }, 820);
+        }, 800);
       });
     } else {
       app.style.opacity = '1';
@@ -129,7 +120,7 @@
       e.preventDefault();
       const userMessage = document.getElementById('prompt').value.trim();
       if (!userMessage) return;
-      outEl.innerHTML = '<p class="text-white/70">⏳ Erzeuge Plan …</p>';
+      outEl.innerHTML = '<p class="text-neutral-500">⏳ Erzeuge Plan …</p>';
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',
@@ -140,10 +131,10 @@
         if (res.ok && data.output) {
           outEl.innerHTML = window.marked ? marked.parse(data.output) : `<pre>${data.output}</pre>`;
         } else {
-          outEl.innerHTML = `<p class="text-red-400">Fehler: ${data.error || 'Unbekannter Fehler'}</p>`;
+          outEl.innerHTML = `<p class="text-red-600">Fehler: ${data.error || 'Unbekannter Fehler'}</p>`;
         }
-      } catch (err) {
-        outEl.innerHTML = `<p class="text-red-400">Netzwerk-/Serverfehler.</p>`;
+      } catch {
+        outEl.innerHTML = `<p class="text-red-600">Netzwerk-/Serverfehler.</p>`;
       }
     });
   </script>
