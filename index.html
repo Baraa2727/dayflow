@@ -6,7 +6,7 @@
     <title>TripFlow – Smarte Tagesrouten</title>
     <meta name="theme-color" content="#000000" />
 
-    <!-- PWA: manifest + icons (leave as-is in your project) -->
+    <!-- PWA: manifest + icons -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="icon" href="/logo.png" />
 
@@ -14,279 +14,342 @@
       :root {
         --bg: #ffffff;
         --fg: #111418;
-        --muted: #6b7280; /* gray-500 */
-        --brand: #111111;
+        --muted: #6b7280;
         --ring: rgba(0,0,0,0.08);
+        --card: #ffffff;
       }
 
-      * { box-sizing: border-box; }
-      html, body { height: 100%; }
-      body {
-        margin: 0;
+      *{ box-sizing: border-box; }
+      html,body{ height:100%; }
+      body{
+        margin:0; color:var(--fg); background:var(--bg);
         font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-        color: var(--fg);
-        background: var(--bg);
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-        -webkit-tap-highlight-color: transparent;
+        -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-tap-highlight-color: transparent;
       }
+      a{ color:inherit; text-decoration:none; }
+      button,input,textarea{ outline:none; border:0; background:transparent; }
 
-      /* Hide any Vercel debug/insights floating buttons if injected */
-      #vercel-toolbar,
-      [data-vercel-insights-overlay],
-      .vercel-insights,
-      .__vercel,
-      [data-cka-fab],
-      .nextjs-portal {
-        display: none !important;
-      }
+      /* Kill any Vercel toolbars/FAB */
+      #vercel-toolbar,[data-vercel-insights-overlay],.vercel-insights,.__vercel,[data-cka-fab],.nextjs-portal{ display:none!important; }
 
-      a { color: inherit; text-decoration: none; }
-      button { cursor: pointer; background: transparent; border: 0; }
-      button, input, textarea { outline: none; }
-
-      .container { max-width: 930px; margin: 0 auto; padding: 16px 16px 96px; }
+      .container{ max-width:930px; margin:0 auto; padding:16px 16px 96px; }
 
       /* Header */
-      .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 8px; }
-      .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
-      .brand img { width: 28px; height: 28px; border-radius: 50%; background:#000; }
-      .user { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; border: 1px solid #e5e7eb; }
+      .topbar{ display:flex; align-items:center; justify-content:space-between; padding:12px 8px; }
+      .brand{ display:flex; align-items:center; gap:10px; font-weight:800; }
+      .brand img{ width:28px; height:28px; border-radius:50%; background:#000; }
+      .user{ width:32px; height:32px; border-radius:50%; display:grid; place-items:center; border:1px solid #e5e7eb; }
 
-      .h1 { font-size: clamp(28px, 6vw, 40px); line-height: 1.1; margin: 14px 0 4px; font-weight: 800; }
-      .h2 { color: var(--muted); margin: 0 0 18px; }
+      .h1{ font-size:clamp(28px,6vw,40px); line-height:1.1; margin:14px 0 4px; font-weight:900; }
+      .h2{ color:var(--muted); margin:0 0 18px; }
 
-      /* Chat input */
-      .inputWrap {
-        position: relative;
-        border-radius: 18px;
-        padding: 12px 56px 12px 56px;
-        box-shadow: 0 0 0 1px #e5e7eb inset, 0 2px 12px var(--ring);
-      }
-      .inputWrap:focus-within { box-shadow: 0 0 0 2px #111 inset, 0 6px 20px var(--ring); }
+      /* Input */
+      .inputWrap{ position:relative; border-radius:18px; padding:12px 56px; box-shadow:0 0 0 1px #eee inset, 0 2px 12px var(--ring); }
+      .inputWrap:focus-within{ box-shadow:0 0 0 2px #111 inset, 0 6px 20px var(--ring); }
+      .prompt{ width:100%; min-height:56px; resize:none; font-size:16px; line-height:1.45; color:var(--fg); }
 
-      .prompt {
-        width: 100%;
-        min-height: 56px;
-        border: 0;
-        resize: none;
-        font-size: 16px; /* prevents iOS zoom */
-        line-height: 1.45;
-        color: var(--fg);
-        background: transparent;
-      }
+      /* Clean icon buttons (black icons, no grey frames) */
+      .iconbtn{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; display:grid; place-items:center; border-radius:12px; }
+      .iconbtn:active{ transform:translateY(-50%) scale(.98); }
+      .mic{ left:6px; }
+      .send{ right:6px; }
+      .clip{ right:52px; }
+      .iconbtn svg{ width:18px; height:18px; fill:#000; stroke:#000; }
+      .recording svg{ animation: blink .9s steps(2,end) infinite; }
+      @keyframes blink{ 50%{ opacity:.25 } }
 
-      /* Mic & Send buttons – no ugly outlines or borders */
-      .btn {
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 40px; height: 40px;
-        display: grid; place-items: center;
-        border-radius: 12px;
-        box-shadow: 0 0 0 1px #e5e7eb inset;
-        transition: transform .08s ease, box-shadow .15s ease, background .15s ease;
-        background: #fff;
-      }
-      .btn:active { transform: translateY(-50%) scale(0.98); }
-      .btn:hover { box-shadow: 0 0 0 1px #d1d5db inset; }
+      /* Examples – fade in/out ticker */
+      .examples{ display:flex; gap:8px; align-items:center; margin:10px 4px 0; color:var(--muted); font-size:13px; }
+      .roller{ position:relative; height:18px; overflow:hidden; width:100%; }
+      .roller span{ position:absolute; left:0; top:0; opacity:0; transition: opacity .6s ease; }
+      .roller span.show{ opacity:1; }
 
-      .btn-mic { left: 8px; }
-      .btn-send { right: 8px; }
+      /* Cards */
+      .card{ margin-top:16px; padding:16px; border-radius:14px; box-shadow:0 0 0 1px #e5e7eb inset; background:var(--card); }
 
-      .btn svg { width: 18px; height: 18px; }
-      .recording { background: #000; color: #fff; box-shadow: 0 0 0 1px #000 inset; }
+      footer{ text-align:center; font-size:12px; color:var(--muted); padding:28px 0; }
 
-      /* Example prompts – clean, no frames */
-      .examples { display: flex; gap: 8px; align-items: center; margin: 10px 4px 0; color: var(--muted); font-size: 13px; }
-      .example-roller { position: relative; height: 18px; overflow: hidden; }
-      .example-roller > div { position: absolute; left: 0; top: 0; white-space: nowrap; transition: transform .5s ease; }
+      /* Splash (black bg, longer fade in/out, white logo) */
+      .splash{ position:fixed; inset:0; z-index:9999; background:#000; display:grid; place-items:center; }
+      .s-inner{ display:grid; place-items:center; gap:14px; animation: splashHold 2200ms ease both; }
+      .logo{ width:74px; height:74px; border-radius:50%; background:#111; display:grid; place-items:center; box-shadow:0 0 0 1px rgba(255,255,255,.14) inset, 0 0 40px rgba(255,255,255,.08); animation:pulse 1400ms ease-in-out infinite; }
+      .logo img{ width:36px; height:36px; filter:invert(1); }
+      .s-title{ color:#fff; font-weight:800; letter-spacing:.3px; opacity:.9; }
+      @keyframes pulse{ 0%,100%{ transform:scale(1); opacity:.9 } 50%{ transform:scale(1.045); opacity:1 } }
+      @keyframes fadeOut{ to{ opacity:0; visibility:hidden } }
+      @keyframes splashHold{ 0%{ opacity:0 } 10%{ opacity:1 } 90%{ opacity:1 } 100%{ opacity:1 } }
 
-      .help { margin: 14px 4px 0; color: var(--muted); font-size: 12px; }
+      /* Router views */
+      .view{ display:none; }
+      .view.active{ display:block; }
 
-      /* Output card */
-      .card {
-        margin-top: 16px;
-        padding: 16px;
-        border-radius: 14px;
-        box-shadow: 0 0 0 1px #e5e7eb inset;
-        background: #fff;
-      }
-      .card h3 { margin: 0 0 8px; }
+      /* Chat view (Layla/ChatGPT style) */
+      .chatWrap{ height:calc(100dvh - 64px); display:flex; flex-direction:column; }
+      .chatBody{ flex:1; overflow:auto; padding:8px 8px 96px; }
+      .msg{ max-width:720px; margin:12px auto; padding:14px 16px; border-radius:14px; box-shadow:0 0 0 1px #eee inset; background:#fff; }
+      .me{ background:#111; color:#fff; box-shadow:none; }
+      .composer{ position:fixed; left:0; right:0; bottom:0; background:#fff; padding:12px 10px calc(12px + env(safe-area-inset-bottom)); box-shadow:0 -6px 24px rgba(0,0,0,.06); }
+      .composer .inputWrap{ max-width:930px; margin:0 auto; }
 
-      footer { text-align: center; font-size: 12px; color: var(--muted); padding: 28px 0; }
+      /* Bottom sheet for profile/options */
+      .sheet{ position:fixed; left:0; right:0; bottom:-100%; background:#fff; box-shadow:0 -8px 30px rgba(0,0,0,.15); border-radius:18px 18px 0 0; padding:16px; transition:bottom .25s ease; z-index:50; }
+      .sheet.open{ bottom:0; }
+      .sheet h4{ margin:6px 0 12px; }
+      .sheet ul{ list-style:none; padding:0; margin:0; }
+      .sheet li{ padding:14px 6px; border-bottom:1px solid #eee; }
+      .sheet a{ display:block; }
 
-      /* Splash screen overlay (keeps main page white) */
-      .splash {
-        position: fixed; inset: 0; z-index: 9999;
-        background: #000; display: grid; place-items: center;
-        animation: splash-hold 1600ms cubic-bezier(.2,.8,.2,1) both, fade-out 400ms ease 1600ms forwards;
-      }
-      .splash-inner { display: grid; place-items: center; gap: 14px; }
-      .logo {
-        width: 74px; height: 74px; border-radius: 50%;
-        background: #111; display: grid; place-items: center; box-shadow: 0 0 0 1px rgba(255,255,255,.15) inset, 0 0 40px rgba(255,255,255,.08);
-        animation: pulse 1200ms ease-in-out infinite;
-      }
-      .logo img { width: 36px; height: 36px; filter: invert(1); }
-      .splash-title { color: #fff; font-weight: 700; letter-spacing: .3px; }
+      .hidden{ display:none; }
 
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); opacity: .9; }
-        50% { transform: scale(1.04); opacity: 1; }
-      }
-      @keyframes fade-out { to { opacity: 0; visibility: hidden; } }
-      @keyframes splash-hold { from { opacity: 1; } to { opacity: 1; } }
-
-      /* Utilities */
-      .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
+      /* Utility visually-hidden for aria only */
+      .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     </style>
   </head>
   <body>
-    <!-- Splash overlay (kept a bit longer, fade on exit) -->
+    <!-- Splash -->
     <div id="splash" class="splash" aria-hidden="true">
-      <div class="splash-inner">
+      <div class="s-inner">
         <div class="logo"><img src="/logo.png" alt="TripFlow" /></div>
-        <div class="splash-title">TripFlow</div>
+        <div class="s-title">TripFlow</div>
       </div>
     </div>
 
-    <div class="container">
-      <header class="topbar">
-        <div class="brand">
-          <img src="/logo.png" alt="TripFlow" />
-          <div>TripFlow</div>
+    <!-- HEADER (shared) -->
+    <header class="topbar">
+      <a class="brand" id="homeLink" href="#/">
+        <img src="/logo.png" alt="TripFlow" /><div>TripFlow</div>
+      </a>
+      <button id="userBtn" class="user" aria-label="Profil öffnen">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
+    </header>
+
+    <!-- HOME VIEW -->
+    <main id="view-home" class="view active">
+      <div class="container">
+        <h1 class="h1">Smarte Tagesrouten</h1>
+        <p class="h2">Klar, klickbar, ready.</p>
+
+        <section class="inputWrap">
+          <textarea id="prompt" class="prompt" placeholder="Erstelle eine Tagestour in Berlin bei Regen." rows="2"></textarea>
+          <button id="clipBtn" class="iconbtn clip" title="Datei anhängen" aria-label="Datei anhängen">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.44 11.05 12 20.5a6 6 0 1 1-8.49-8.49L13 2.5a4 4 0 1 1 5.66 5.66L8.5 18.34" fill="none" stroke="#000" stroke-width="2"/></svg>
+          </button>
+          <button id="micBtn" class="iconbtn mic" aria-label="Spracheingabe starten">
+            <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 19v3"/></svg>
+          </button>
+          <button id="sendBtn" class="iconbtn send" aria-label="Absenden">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+          </button>
+        </section>
+
+        <div class="examples" id="examples">
+          <span>Beispiele:</span>
+          <div class="roller" aria-hidden="true"><span id="exLine"></span></div>
         </div>
-        <div class="user" aria-label="Profil">
-          <!-- user icon -->
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 1 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
-        </div>
-      </header>
 
-      <h1 class="h1">Smarte Tagesrouten</h1>
-      <p class="h2">Klar, klickbar, ready.</p>
+        <footer>© <span id="year"></span> TripFlow</footer>
+      </div>
+    </main>
 
-      <section class="inputWrap">
-        <textarea id="prompt" class="prompt" placeholder="Erstelle eine Tagestour in Berlin bei Regen." rows="2"></textarea>
-        <button id="micBtn" class="btn btn-mic" aria-label="Spracheingabe starten">
-          <svg id="micIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 19v3"/></svg>
-        </button>
-        <button id="sendBtn" class="btn btn-send" aria-label="Absenden">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
-        </button>
-      </section>
-
-      <div class="examples" id="examples">
-        <span>Beispiele:</span>
-        <div class="example-roller" aria-hidden="true">
-          <div id="exampleLine"></div>
+    <!-- CHAT VIEW -->
+    <section id="view-chat" class="view">
+      <div class="chatWrap">
+        <div id="chatBody" class="chatBody"></div>
+        <div class="composer">
+          <div class="inputWrap">
+            <textarea id="chatInput" class="prompt" placeholder="Nachricht schreiben…" rows="2"></textarea>
+            <button id="chatClip" class="iconbtn clip" title="Datei anhängen" aria-label="Datei anhängen">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.44 11.05 12 20.5a6 6 0 1 1-8.49-8.49L13 2.5a4 4 0 1 1 5.66 5.66L8.5 18.34" fill="none" stroke="#000" stroke-width="2"/></svg>
+            </button>
+            <button id="chatMic" class="iconbtn mic" aria-label="Spracheingabe starten">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 19v3"/></svg>
+            </button>
+            <button id="chatSend" class="iconbtn send" aria-label="Absenden">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M22 2 11 13"/><path d="M22 2 15 22 11 13 2 9z"/></svg>
+            </button>
+          </div>
         </div>
       </div>
+    </section>
 
-      <p class="help">Sprache: Mikro antippen – auf unterstützten Browsern wird deine Sprachnachricht als Text erkannt.</p>
-
-      <div class="card">
-        <h3>Ausgabe</h3>
-        <p>Frag mich z. B. nach einer Tagestour – ich liefere dir eine klare Route mit klickbaren Stopps.</p>
+    <!-- TRIPS (Meine Reisen) VIEW -->
+    <section id="view-trips" class="view">
+      <div class="container">
+        <h2>Meine Reisen</h2>
+        <div id="tripList" class="card"></div>
       </div>
+    </section>
 
-      <footer>© <span id="year"></span> TripFlow</footer>
+    <!-- Bottom sheet -->
+    <div id="sheet" class="sheet" role="dialog" aria-modal="true" aria-label="Menü">
+      <h4>Menü</h4>
+      <ul>
+        <li><a href="#/trips" id="openTrips">Meine Reisen</a></li>
+        <li><a href="#">Einstellungen (bald)</a></li>
+        <li><a href="#">Hilfe (bald)</a></li>
+      </ul>
     </div>
 
     <script>
+      const $ = (s, r=document) => r.querySelector(s);
+      const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+
       // Year
-      document.getElementById('year').textContent = new Date().getFullYear();
+      $('#year').textContent = new Date().getFullYear();
 
-      // Splash dismissal (kept longer via CSS; also ensure we remove node after anim end)
-      const splash = document.getElementById('splash');
-      splash.addEventListener('animationend', (e) => {
-        if (e.animationName === 'fade-out') splash.remove();
-      });
+      // Splash fade in & out timing
+      const splash = $('#splash');
+      setTimeout(()=>{ splash.style.animation = 'fadeOut 700ms ease forwards'; }, 2200);
+      splash.addEventListener('animationend', (e)=>{ if(e.animationName==='fadeOut') splash.remove(); });
 
-      // Rotating example prompts (no frames)
-      const EXAMPLES = [
+      // Bottom sheet
+      const sheet = $('#sheet');
+      $('#userBtn').addEventListener('click', ()=> sheet.classList.toggle('open'));
+      sheet.addEventListener('click', (e)=>{ if(e.target === sheet) sheet.classList.remove('open'); });
+
+      // Examples – fade ticker
+      const EXAMPLES=[
         'Ich bin in Lissabon – plane einen halben Tag mit Aussichtspunkten.',
         'Streetfood in Bangkok + Rooftop-Bar am Ende.',
         'Familientag in München bei Regen – Indoor & Café.',
         'Rom: antike Highlights + Gelato-Stopps.',
         'Tokio: trendige Viertel & ein kurzer Spaziergang.'
       ];
-      const line = document.getElementById('exampleLine');
-      let idx = 0;
-      function renderExample() {
-        line.style.transform = 'translateY(100%)';
-        setTimeout(() => {
-          line.textContent = EXAMPLES[idx % EXAMPLES.length];
-          idx++;
-          line.style.transform = 'translateY(0)';
+      const exEl = $('#exLine');
+      let exIdx = 0;
+      function nextExample(){
+        exEl.classList.remove('show');
+        setTimeout(()=>{
+          exEl.textContent = EXAMPLES[exIdx % EXAMPLES.length];
+          exEl.classList.add('show');
+          exIdx++;
         }, 250);
       }
-      renderExample();
-      const rot = setInterval(renderExample, 3500);
+      nextExample();
+      const exInt = setInterval(nextExample, 3500);
 
-      // Hide examples when user focuses/starts typing
-      const promptEl = document.getElementById('prompt');
-      const examples = document.getElementById('examples');
-      function hideExamples(){ examples.style.display = 'none'; clearInterval(rot); }
-      promptEl.addEventListener('focus', hideExamples, { once: true });
-      promptEl.addEventListener('input', hideExamples, { once: true });
+      // Hide examples when typing/focus
+      const promptEl = $('#prompt');
+      const examples = $('#examples');
+      function hideExamples(){ examples.classList.add('hidden'); clearInterval(exInt); }
+      promptEl.addEventListener('focus', hideExamples, { once:true });
+      promptEl.addEventListener('input', hideExamples, { once:true });
 
-      // Microphone (Web Speech API) with Safari/iOS support
-      const micBtn = document.getElementById('micBtn');
-      const micIcon = document.getElementById('micIcon');
-      let recognition, listening = false;
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      // SPA Router
+      const routes = {
+        '#/': () => show('home'),
+        '#/chat': () => show('chat'),
+        '#/trips': () => { renderTrips(); show('trips'); },
+      };
+      function show(name){
+        $$('.view').forEach(v=>v.classList.remove('active'));
+        $('#view-'+name).classList.add('active');
+      }
+      function onRoute(){ (routes[location.hash]||routes['#/'])(); sheet.classList.remove('open'); }
+      window.addEventListener('hashchange', onRoute); onRoute();
+      $('#homeLink').addEventListener('click', ()=>{ location.hash = '#/'; });
 
-      if (SpeechRecognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'de-DE';
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
+      // Persistence for trips
+      const store = {
+        key:'tripflow_trips',
+        all(){ try{ return JSON.parse(localStorage.getItem(this.key)||'[]'); }catch{ return [] } },
+        save(list){ localStorage.setItem(this.key, JSON.stringify(list)); },
+        add(trip){ const list=this.all(); list.unshift(trip); this.save(list); },
+      };
 
-        recognition.addEventListener('result', (event) => {
-          let transcript = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            transcript += event.results[i][0].transcript;
-          }
-          promptEl.value = transcript.trim();
-        });
-        recognition.addEventListener('end', () => {
-          listening = false;
-          micBtn.classList.remove('recording');
-        });
-
-        micBtn.addEventListener('click', () => {
-          if (!listening) {
-            try {
-              recognition.start();
-              listening = true;
-              micBtn.classList.add('recording');
-            } catch (e) { /* ignored: start called quickly */ }
-          } else {
-            recognition.stop();
-          }
-        });
-      } else {
-        // Fallback: brief vibration + toast
-        micBtn.addEventListener('click', () => {
-          if (navigator.vibrate) navigator.vibrate(30);
-          alert('Spracheingabe wird von diesem Browser leider nicht unterstützt.');
-        });
+      function renderTrips(){
+        const list = store.all();
+        const box = $('#tripList');
+        if(!list.length){ box.innerHTML = '<p>Noch keine Reisen – starte eine neue Anfrage auf der Startseite.</p>'; return; }
+        box.innerHTML = list.map(t => `<div style="padding:10px 0;border-bottom:1px solid #eee"><a href="#/chat" data-id="${t.id}"><strong>${t.title}</strong><br><small>${new Date(t.created).toLocaleString()}</small></a></div>`).join('');
+        $$('#tripList a').forEach(a=>a.addEventListener('click', (e)=>{
+          e.preventDefault();
+          loadChat(a.getAttribute('data-id'));
+        }));
       }
 
-      // Submit handler (wire to your /api/generate if needed)
-      const sendBtn = document.getElementById('sendBtn');
-      sendBtn.addEventListener('click', () => {
-        // TODO: Hook into /api/generate
-        if (!promptEl.value.trim()) {
-          promptEl.focus();
-          return;
-        }
-        console.log('Send prompt:', promptEl.value.trim());
+      // Chat rendering
+      let currentTripId = null;
+      function appendMsg(text, me=false){
+        const el = document.createElement('div');
+        el.className = 'msg'+(me?' me':'');
+        el.innerHTML = text.replace(/
+/g,'<br>');
+        $('#chatBody').appendChild(el);
+        $('#chatBody').scrollTop = $('#chatBody').scrollHeight;
+      }
+      function newTrip(title, firstMsg){
+        currentTripId = 't_'+Date.now();
+        const trip = { id: currentTripId, title, created: Date.now(), messages: [{role:'user', content:firstMsg}] };
+        store.add(trip);
+        renderTrips();
+        loadChat(currentTripId);
+      }
+      function loadChat(id){
+        const t = store.all().find(x=>x.id===id);
+        if(!t){ location.hash = '#/trips'; return; }
+        currentTripId = id; $('#chatBody').innerHTML = '';
+        t.messages.forEach(m=>appendMsg(m.content, m.role==='user'));
+        location.hash = '#/chat';
+      }
+      function saveAssistantMessage(content){
+        const list = store.all(); const t = list.find(x=>x.id===currentTripId); if(!t) return;
+        t.messages.push({role:'assistant', content}); store.save(list);
+      }
+      function saveUserMessage(content){
+        const list = store.all(); const t = list.find(x=>x.id===currentTripId); if(!t) return;
+        t.messages.push({role:'user', content}); store.save(list);
+      }
+
+      // Web Speech API on home input mic
+      let recognition, listening=false;
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if(SpeechRecognition){
+        recognition = new SpeechRecognition(); recognition.lang = 'de-DE'; recognition.interimResults = true; recognition.maxAlternatives = 1;
+        recognition.addEventListener('result', (e)=>{ let tx=''; for(let i=e.resultIndex;i<e.results.length;i++){ tx += e.results[i][0].transcript; } promptEl.value = tx.trim(); });
+        recognition.addEventListener('end', ()=>{ listening=false; $('#micBtn').classList.remove('recording'); });
+        $('#micBtn').addEventListener('click', ()=>{ if(!listening){ try{ recognition.start(); listening=true; $('#micBtn').classList.add('recording'); }catch(e){} } else { recognition.stop(); } });
+      } else {
+        $('#micBtn').addEventListener('click', ()=>{ if(navigator.vibrate) navigator.vibrate(30); alert('Spracheingabe wird von diesem Browser nicht unterstützt.'); });
+      }
+
+      // SEND from home -> create trip, navigate to chat, call backend
+      $('#sendBtn').addEventListener('click', async ()=>{
+        const q = promptEl.value.trim(); if(!q){ promptEl.focus(); return; }
+        newTrip(q, q);
+        await sendInChat(q);
       });
 
-      // Prevent any default focus rings on buttons on iOS after tap
-      document.addEventListener('touchstart', function(){}, {passive: true});
+      // CHAT send
+      $('#chatSend').addEventListener('click', async ()=>{
+        const inp = $('#chatInput'); const q = inp.value.trim(); if(!q) return; appendMsg(q, true); saveUserMessage(q); inp.value='';
+        await sendInChat(q);
+      });
+
+      async function sendInChat(q){
+        appendMsg('⏳ Generiere Plan…');
+        try{
+          const res = await fetch('/api/generate', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ prompt:q }) });
+          const data = await res.json();
+          const text = (data && (data.plan || data.text || data.content || JSON.stringify(data)))
+            + '
+
+<i>Bitte überprüfe Route, Adressen und Namen – die KI kann vereinzelt Fehler machen.</i>';
+          appendMsg(text); saveAssistantMessage(text);
+        }catch(err){ appendMsg('❌ Fehler beim Generieren. Bitte später erneut versuchen.'); }
+      }
+
+      // File attach buttons (no images)
+      function setupNoImageAttach(btn){
+        const input = document.createElement('input'); input.type='file'; input.accept='.txt,.pdf,.csv,.md,.json'; input.multiple=true; input.style.display='none'; document.body.appendChild(input);
+        btn.addEventListener('click', ()=> input.click());
+        input.addEventListener('change', ()=>{ const names=[...input.files].map(f=>f.name).join(', '); alert('Dateien angehängt: '+names+' (Bildformate sind deaktiviert)'); });
+      }
+      setupNoImageAttach($('#clipBtn')); setupNoImageAttach($('#chatClip'));
+
+      // Close sheet on route to trips link
+      $('#openTrips').addEventListener('click', ()=> sheet.classList.remove('open'));
     </script>
 
     <!-- Register Service Worker if present -->
