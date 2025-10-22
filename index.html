@@ -44,14 +44,10 @@
 </head>
 <body class="bg-white text-neutral-900">
 
-  <!-- Splash Overlay (nur PWA/Standalone sichtbar) -->
-  <div id="splash"
-       class="fixed inset-0 z-50 grid place-items-center bg-white"
-       aria-hidden="true" hidden>
+  <!-- Splash Overlay -->
+  <div id="splash" class="fixed inset-0 z-50 grid place-items-center bg-white" aria-hidden="true" hidden>
     <div class="flex flex-col items-center gap-3 splash-in">
-      <!-- Rundes Logo im Kreis -->
       <div class="w-20 h-20 rounded-full ring-1 ring-black/10 overflow-hidden bg-black grid place-items-center">
-        <!-- Nimm hier dein App-Icon oder Logo -->
         <img src="/app-icon.png" alt="TripFlow" class="w-full h-full object-cover" />
       </div>
       <div class="text-sm font-semibold tracking-tight text-neutral-800">TripFlow</div>
@@ -74,16 +70,8 @@
 
     <section class="rounded-2xl border border-neutral-200 shadow-sm p-4 md:p-5 mb-6">
       <form id="f" class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto]">
-        <input
-          id="prompt"
-          class="rounded-xl border border-neutral-200 px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-neutral-900/10"
-          placeholder="z. B. 1 Tag in Düsseldorf – entspannt, vegetarisch"
-          aria-label="Reise-Wunsch"
-        />
-        <button type="submit"
-          class="rounded-xl bg-black text-white px-5 py-3 text-sm font-medium hover:bg-neutral-900 active:scale-[.99] transition">
-          Plan generieren
-        </button>
+        <input id="prompt" class="rounded-xl border border-neutral-200 px-4 py-3 text-[15px] outline-none focus:ring-2 focus:ring-neutral-900/10" placeholder="z. B. 1 Tag in Düsseldorf – entspannt, vegetarisch" aria-label="Reise-Wunsch" />
+        <button type="submit" class="rounded-xl bg-black text-white px-5 py-3 text-sm font-medium hover:bg-neutral-900 active:scale-[.99] transition">Plan generieren</button>
       </form>
       <p class="mt-2 text-xs text-neutral-500">Hinweis: Im Mock-Modus werden Beispielpläne erzeugt; später mit OpenAI live schalten.</p>
     </section>
@@ -106,52 +94,40 @@
     // Jahr
     document.getElementById('y').textContent = new Date().getFullYear();
 
-    // Splash nur in PWA/Standalone zeigen
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     const splash = document.getElementById('splash');
     const app   = document.getElementById('app');
 
     if (isStandalone && splash) {
-      splash.hidden = false; // zeigen
-      // App leicht verzögert einblenden, während Splash ausblendet
+      splash.hidden = false;
       window.addEventListener('load', () => {
         setTimeout(() => {
-          // Splash-Out
           const inner = splash.firstElementChild;
           if (inner) inner.classList.remove('splash-in'), inner.classList.add('splash-out');
-
-          // App einblenden
           app.style.transition = 'opacity 360ms ease-out';
           app.style.opacity = '1';
-
-          // Splash entfernen
           setTimeout(() => { splash.remove(); }, 420);
-        }, 380); // Splash-Dauer ~0.38s
+        }, 380);
       });
     } else {
-      // Kein Standalone: App sofort zeigen
       app.style.opacity = '1';
       if (splash) splash.remove();
     }
 
-    // Form Handler
+    // Formular
     const form = document.getElementById('f');
     const outEl = document.getElementById('out');
-
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const userMessage = document.getElementById('prompt').value.trim();
       if (!userMessage) return;
-
       outEl.innerHTML = '<p class="text-neutral-500">⏳ Erzeuge Plan …</p>';
-
       try {
         const res = await fetch('/api/generate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userMessage })
         });
-
         const data = await res.json();
         if (res.ok && data.output) {
           outEl.innerHTML = window.marked ? marked.parse(data.output) : `<pre>${data.output}</pre>`;
@@ -163,5 +139,7 @@
       }
     });
   </script>
+  <!-- Service Worker Registrierung -->
+  <script defer src="/register-sw.js"></script>
 </body>
 </html>
