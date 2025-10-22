@@ -11,7 +11,9 @@
     <style>
       :root { --bg:#fff; --fg:#111418; --muted:#6b7280; --ring:rgba(0,0,0,.08); }
       *{box-sizing:border-box} html,body{height:100%}
-      body{margin:0;color:var(--fg);background:var(--bg);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
+      body{margin:0;color:var(--fg);background:var(--bg);
+           font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji";
+           -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;-webkit-tap-highlight-color:transparent}
       a{color:inherit;text-decoration:none} button,input,textarea{outline:none;border:0;background:transparent}
       #vercel-toolbar,[data-vercel-insights-overlay],.vercel-insights,.__vercel,[data-cka-fab],.nextjs-portal{display:none!important}
 
@@ -20,14 +22,14 @@
       .brand{display:flex;align-items:center;gap:10px;font-weight:800}
       .brand img{width:28px;height:28px;border-radius:50%}
 
-      /* User-Icon ohne grauen Kreis */
+      /* User-Icon: schwarze Linien, kein grauer Kreis */
       .user{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:transparent;border:none;box-shadow:none}
       .user svg{width:18px;height:18px;stroke:#111;fill:none}
 
       .h1{font-size:clamp(28px,6vw,40px);line-height:1.1;margin:14px 0 4px;font-weight:900}
       .h2{color:var(--muted);margin:0 0 18px}
 
-      /* Home input höher, damit Placeholder-Zeilen reinpassen */
+      /* Home input höher, damit Placeholder reinpasst */
       .inputWrap{position:relative;border-radius:18px;padding:12px 56px;box-shadow:0 0 0 1px #eee inset,0 2px 12px var(--ring)}
       .inputWrap:focus-within{box-shadow:0 0 0 2px #111 inset,0 6px 20px var(--ring)}
       .prompt{width:100%;min-height:96px;resize:none;font-size:16px;line-height:1.45;color:var(--fg)}
@@ -41,7 +43,7 @@
 
       footer{text-align:center;font-size:12px;color:var(--muted);padding:28px 0}
 
-      /* Splash (Overlay, klickt nicht ab) */
+      /* Splash (Overlay, klickt nichts ab) */
       .splash{position:fixed;inset:0;z-index:9999;background:#000;display:grid;place-items:center;animation:splashSeq 2600ms ease forwards;pointer-events:none}
       .s-inner{display:grid;place-items:center;gap:14px}
       .logo{display:grid;place-items:center}
@@ -151,69 +153,68 @@
     <script>
       // Helpers
       const $=(s,r=document)=>r.querySelector(s); const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-      $('#year').textContent=new Date().getFullYear();
+      const yearEl = $('#year'); if(yearEl) yearEl.textContent = new Date().getFullYear();
 
-      // Splash sicher entfernen
-      const splash=$('#splash');
-      splash.addEventListener('animationend',()=> splash.remove());
-      setTimeout(()=>{ if($('#splash')) splash.remove(); }, 3500);
+      // ---- Splash robust entfernen (keine Klick-Blockade) ----
+      function killSplash(){ const s=document.getElementById('splash'); if(s){ s.style.display='none'; try{s.remove();}catch(_){ s.parentNode && s.parentNode.removeChild(s);} } }
+      const sEl=document.getElementById('splash');
+      if(sEl){ sEl.addEventListener('animationend', killSplash); setTimeout(killSplash, 3000); window.addEventListener('pageshow', killSplash); }
 
-      // Bottom sheet
-      const sheet=$('#sheet');
-      $('#userBtn').addEventListener('click',()=> sheet.classList.toggle('open'));
-      sheet.addEventListener('click',e=>{ if(e.target===sheet) sheet.classList.remove('open'); });
-      $('#newTrip').addEventListener('click',()=>{ location.hash='#/'; sheet.classList.remove('open'); });
-      $('#openTrips').addEventListener('click',()=> sheet.classList.remove('open'));
+      // ---- Bottom sheet ----
+      const sheet=document.getElementById('sheet');
+      const userBtn=document.getElementById('userBtn');
+      if(userBtn){ userBtn.addEventListener('click', ()=> sheet.classList.toggle('open')); }
+      if(sheet){ sheet.addEventListener('click', e=>{ if(e.target===sheet) sheet.classList.remove('open'); }); }
+      const newTripLink=document.getElementById('newTrip');
+      if(newTripLink){ newTripLink.addEventListener('click', ()=>{ location.hash='#/'; sheet.classList.remove('open'); }); }
+      const openTripsLink=document.getElementById('openTrips');
+      if(openTripsLink){ openTripsLink.addEventListener('click', ()=> sheet.classList.remove('open')); }
 
-      // Placeholder-Rotation im Textfeld (Home)
+      // ---- Placeholder-Rotation (Home) ----
       const PHRASES=[
         'Ich bin in Lissabon – was soll ich heute machen?',
         'Erstelle eine Tagestour in Berlin bei Regen',
         'Plan mir 2 Tage in Barcelona mit Sightseeing und Restauranttipps.',
         'Mach mir eine Wochenendroute für Wandern im Schwarzwald'
       ];
-      const promptEl=$('#prompt');
+      const promptEl=document.getElementById('prompt');
       let phTimer=null, phIdx=0;
-      function startPlaceholder(){ stopPlaceholder(); function tick(){ promptEl.placeholder = PHRASES[phIdx%PHRASES.length]; phIdx++; } tick(); phTimer=setInterval(tick,3500); }
+      function startPlaceholder(){ stopPlaceholder(); function tick(){ if(promptEl) promptEl.placeholder = PHRASES[phIdx%PHRASES.length]; phIdx++; } tick(); phTimer=setInterval(tick,3500); }
       function stopPlaceholder(){ if(phTimer){ clearInterval(phTimer); phTimer=null; } }
-      promptEl.addEventListener('focus',stopPlaceholder);
-      promptEl.addEventListener('input',stopPlaceholder);
+      if(promptEl){ promptEl.addEventListener('input', stopPlaceholder); promptEl.addEventListener('focus', stopPlaceholder); }
 
-      // Router
-      const routes={'#/':()=>{ show('home'); promptEl.value=''; startPlaceholder(); }, '#/chat':()=>show('chat'), '#/trips':()=>{renderTrips();show('trips');}};
-      function show(n){ $$('.view').forEach(v=>v.classList.remove('active')); $('#view-'+n).classList.add('active'); }
-      function onRoute(){ (routes[location.hash]||routes['#/'])(); sheet.classList.remove('open'); }
-      window.addEventListener('hashchange',onRoute); onRoute();
-      $('#homeLink').addEventListener('click',()=>{ location.hash='#/'; });
+      // ---- Router ----
+      const routes={'#/':()=>{ show('home'); if(promptEl){ promptEl.value=''; startPlaceholder(); } }, '#/chat':()=>show('chat'), '#/trips':()=>{ renderTrips(); show('trips'); }};
+      function show(n){ $$('.view').forEach(v=>v.classList.remove('active')); const view=document.getElementById('view-'+n); if(view) view.classList.add('active'); }
+      function onRoute(){ (routes[location.hash]||routes['#/'])(); if(sheet) sheet.classList.remove('open'); }
+      window.addEventListener('hashchange', onRoute); onRoute();
+      const homeLink=document.getElementById('homeLink'); if(homeLink){ homeLink.addEventListener('click', ()=>{ location.hash='#/'; }); }
 
-      // Storage (Meine Reisen)
+      // ---- Storage (Meine Reisen) ----
       const store={ key:'tripflow_trips', all(){ try{return JSON.parse(localStorage.getItem(this.key)||'[]');}catch{return[]} }, save(l){ localStorage.setItem(this.key,JSON.stringify(l)); }, add(t){ const l=this.all(); l.unshift(t); this.save(l); } };
-      function renderTrips(){ const list=store.all(), box=$('#tripList'); if(!list.length){ box.innerHTML='<p>Noch keine Reisen – starte eine neue Anfrage auf der Startseite.</p>'; return; } box.innerHTML=list.map(t=>`<div style="padding:10px 0;border-bottom:1px solid #eee"><a href="#/chat" data-id="${t.id}"><strong>${t.title}</strong><br><small>${new Date(t.created).toLocaleString()}</small></a></div>`).join(''); $$('#tripList a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();loadChat(a.getAttribute('data-id'));})); }
+      function renderTrips(){ const list=store.all(), box=document.getElementById('tripList'); if(!box) return; if(!list.length){ box.innerHTML='<p>Noch keine Reisen – starte eine neue Anfrage auf der Startseite.</p>'; return; } box.innerHTML=list.map(t=>`<div style="padding:10px 0;border-bottom:1px solid #eee"><a href="#/chat" data-id="${t.id}"><strong>${t.title}</strong><br><small>${new Date(t.created).toLocaleString()}</small></a></div>`).join(''); $$('#tripList a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();loadChat(a.getAttribute('data-id'));})); }
 
-      // Stadt-Erkennung (Mock)
+      // ---- Stadt-Erkennung (Mock) ----
       const KNOWN_CITIES=['Berlin','Lissabon','Lisboa','Barcelona','München','Rom','Tokio','Bangkok','Schwarzwald','Hamburg','Paris','London','Wien','Zürich'];
       function extractCity(q){ for(const c of KNOWN_CITIES){ const re=new RegExp(`\b${c}\b`,'i'); if(re.test(q)) return c; } const m=q.match(/([A-ZÄÖÜ][a-zäöüß]+(?:-[A-ZÄÖÜ][a-zäöüß]+)?)/); return m?m[1]:'Reise'; }
 
-      // Chat Rendering
+      // ---- Chat Rendering ----
       let currentTripId=null;
-      function appendMsg(text,me=false){ const el=document.createElement('div'); el.className='msg'+(me?' me':''); el.innerHTML=String(text).replace(/
-/g,'<br>'); const body=$('#chatBody'); body.appendChild(el); body.scrollTop=body.scrollHeight; return el; }
+      function appendMsg(text,me=false){ const el=document.createElement('div'); el.className='msg'+(me?' me':''); el.innerHTML=String(text).replace(/\n/g,'<br>'); const body=document.getElementById('chatBody'); if(body){ body.appendChild(el); body.scrollTop=body.scrollHeight; } return el; }
       function newTrip(title,firstMsg){ currentTripId='t_'+Date.now(); const trip={id:currentTripId,title,created:Date.now(),messages:[{role:'user',content:firstMsg}]}; store.add(trip); renderTrips(); loadChat(currentTripId); }
-      function loadChat(id){ const t=store.all().find(x=>x.id===id); if(!t){ location.hash='#/trips'; return; } currentTripId=id; $('#chatBody').innerHTML=''; t.messages.forEach(m=>appendMsg(m.content,m.role==='user')); location.hash='#/chat'; }
+      function loadChat(id){ const t=store.all().find(x=>x.id===id); if(!t){ location.hash='#/trips'; return; } currentTripId=id; const body=document.getElementById('chatBody'); if(body){ body.innerHTML=''; } t.messages.forEach(m=>appendMsg(m.content,m.role==='user')); location.hash='#/chat'; }
       function saveAssistantMessage(content){ const list=store.all(); const t=list.find(x=>x.id===currentTripId); if(!t) return; t.messages.push({role:'assistant',content}); store.save(list); }
       function saveUserMessage(content){ const list=store.all(); const t=list.find(x=>x.id===currentTripId); if(!t) return; t.messages.push({role:'user',content}); store.save(list); }
 
-      // Mic (Home + Chat)
+      // ---- Mic (Home + Chat) ----
       let recognition,listening=false; const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-      function startMic(btn,target){ if(!SR){ alert('Spracheingabe wird nicht unterstützt.'); return; } if(!recognition){ recognition=new SR(); recognition.lang='de-DE'; recognition.interimResults=true; recognition.maxAlternatives=1; recognition.addEventListener('result',(e)=>{ let tx=''; for(let i=e.resultIndex;i<e.results.length;i++){ tx+=e.results[i][0].transcript; } target.value=tx.trim(); }); recognition.addEventListener('end',()=>{ listening=false; btn.classList.remove('recording'); }); }
-        if(!listening){ try{ recognition.start(); listening=true; btn.classList.add('recording'); }catch(e){} } else { recognition.stop(); }
-      }
-      $('#micBtn').addEventListener('click',()=> startMic($('#micBtn'), promptEl));
-      $('#chatMic').addEventListener('click',()=> startMic($('#chatMic'), $('#chatInput')));
+      function startMic(btn,target){ if(!SR){ alert('Spracheingabe wird nicht unterstützt.'); return; } if(!recognition){ recognition=new SR(); recognition.lang='de-DE'; recognition.interimResults=true; recognition.maxAlternatives=1; recognition.addEventListener('result',(e)=>{ let tx=''; for(let i=e.resultIndex;i<e.results.length;i++){ tx+=e.results[i][0].transcript; } if(target) target.value=tx.trim(); }); recognition.addEventListener('end',()=>{ listening=false; if(btn) btn.classList.remove('recording'); }); } if(!listening){ try{ recognition.start(); listening=true; if(btn) btn.classList.add('recording'); }catch(e){} } else { recognition.stop(); } }
+      const micBtn=document.getElementById('micBtn'); if(micBtn){ micBtn.addEventListener('click',()=> startMic(micBtn, promptEl)); }
+      const chatMic=document.getElementById('chatMic'); if(chatMic){ chatMic.addEventListener('click',()=> startMic(chatMic, document.getElementById('chatInput'))); }
 
-      // Senden
-      $('#sendBtn').addEventListener('click',async()=>{ const q=(promptEl.value.trim() || promptEl.placeholder); if(!q){ promptEl.focus(); return; } const city=extractCity(q); newTrip(city,q); await sendInChat(q); });
-      $('#chatSend').addEventListener('click',async()=>{ const inp=$('#chatInput'); const q=inp.value.trim(); if(!q) return; appendMsg(q,true); saveUserMessage(q); inp.value=''; await sendInChat(q); });
+      // ---- Senden ----
+      const sendBtn=document.getElementById('sendBtn'); if(sendBtn){ sendBtn.addEventListener('click', async()=>{ const q=(promptEl && (promptEl.value.trim() || promptEl.placeholder)) || ''; if(!q){ promptEl && promptEl.focus(); return; } const city=extractCity(q); newTrip(city,q); await sendInChat(q); }); }
+      const chatSend=document.getElementById('chatSend'); if(chatSend){ chatSend.addEventListener('click', async()=>{ const inp=document.getElementById('chatInput'); const q=inp ? inp.value.trim() : ''; if(!q) return; appendMsg(q,true); saveUserMessage(q); if(inp) inp.value=''; await sendInChat(q); }); }
 
       async function sendInChat(q){
         const loader=appendMsg('🧭 <i>TripFlow denkt…</i>');
@@ -224,21 +225,22 @@
             timeout(7000)
           ]);
           const data = await res.json();
-          loader.remove();
-          const text=((data&&(data.plan||data.text||data.content))||JSON.stringify(data))+'
-
-<i>Bitte überprüfe Route, Adressen und Namen – die KI kann vereinzelt Fehler machen.</i>';
+          loader && loader.remove();
+          const text=((data&&(data.plan||data.text||data.content))||JSON.stringify(data))+'\n\n<i>Bitte überprüfe Route, Adressen und Namen – die KI kann vereinzelt Fehler machen.</i>';
           appendMsg(text); saveAssistantMessage(text);
         }catch(err){
-          loader.remove();
-          const mock=`<b>Plan (Mock)</b><br>• A: Café zum Start<br>• B: Sehenswürdigkeit<br>• C: Mittagessen<br>• D: Spaziergang<br>• E: Aussichtspunkt<br>• F: Abendessen<br>• G: Bar – Abschluss`;
+          loader && loader.remove();
+          const mock='<b>Plan (Mock)</b><br>• A: Café zum Start<br>• B: Sehenswürdigkeit<br>• C: Mittagessen<br>• D: Spaziergang<br>• E: Aussichtspunkt<br>• F: Abendessen<br>• G: Bar – Abschluss';
           appendMsg(mock); saveAssistantMessage(mock);
         }
       }
+
+      // Datei-Anhang (keine Bilder) – nur im Chat
+      (function setupNoImageAttach(btn){ if(!btn) return; const input=document.createElement('input'); input.type='file'; input.accept='.txt,.pdf,.csv,.md,.json'; input.multiple=true; input.style.display='none'; document.body.appendChild(input); btn.addEventListener('click',()=> input.click()); input.addEventListener('change',()=>{ const names=[...input.files].map(f=>f.name).join(', '); alert('Dateien angehängt: '+names+' (Bildformate sind deaktiviert)'); }); })(document.getElementById('chatClip'));
     </script>
 
     <script>
-      if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }); }
+      if('serviceWorker' in navigator){ window.addEventListener('load', ()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }); }
     </script>
   </body>
 </html>
